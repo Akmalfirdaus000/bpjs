@@ -35,7 +35,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:3',
-            'role' => 'required|in:admin_bpjs,admin_bkpsdm',
+            'role' => 'required|in:admin_bpjs,admin_bkpsdm,pimpinan',
         ]);
 
         User::create([
@@ -54,7 +54,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:3',
-            'role' => 'required|in:admin_bpjs,admin_bkpsdm',
+            'role' => 'required|in:admin_bpjs,admin_bkpsdm,pimpinan',
         ]);
 
         $updateData = [

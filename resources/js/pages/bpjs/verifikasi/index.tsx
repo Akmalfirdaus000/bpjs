@@ -61,15 +61,17 @@ interface Paginated<T> {
 
 interface Props {
     pensiunans: Paginated<Pensiunan>;
+    processableCount: number;
     filters: { search?: string; status?: string };
 }
 
-export default function VerifikasiIndex({ pensiunans, filters }: Props) {
+export default function VerifikasiIndex({ pensiunans, processableCount = 0, filters }: Props) {
     const [search, setSearch] = useState(filters.search || '');
     const [statusFilter, setStatusFilter] = useState(filters.status || 'all');
     const [isOpen, setIsOpen] = useState(false);
     const [selectedPensiunan, setSelectedPensiunan] = useState<Pensiunan | null>(null);
     const [isReportOpen, setIsReportOpen] = useState(false);
+    const [isBulkOpen, setIsBulkOpen] = useState(false);
     const [reportFilter, setReportFilter] = useState({
         start_date: '',
         end_date: '',
@@ -80,6 +82,25 @@ export default function VerifikasiIndex({ pensiunans, filters }: Props) {
         status: '',
         catatan: '',
     });
+
+    const bulkForm = useForm({
+        email: '',
+        password: '',
+    });
+
+    const handleBulkSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        bulkForm.post('/bpjs/verifikasi/bulk-approve', {
+            onSuccess: () => {
+                setIsBulkOpen(false);
+                bulkForm.reset();
+                toast.success('Persetujuan masal 50 data berhasil diproses.');
+            },
+            onError: () => {
+                toast.error('Gagal melakukan otorisasi. Periksa kembali email dan kata sandi Pimpinan.');
+            }
+        });
+    };
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -144,28 +165,28 @@ export default function VerifikasiIndex({ pensiunans, filters }: Props) {
         switch (status) {
             case 'pending':
                 return (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200 dark:bg-amber-950/40 dark:text-amber-500 dark:border-amber-800/40">
                         <Clock className="size-3" />
                         Pending
                     </span>
                 );
             case 'diproses':
                 return (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200 dark:bg-blue-950/40 dark:text-blue-500 dark:border-blue-800/40">
                         <Play className="size-3" />
                         Diproses
                     </span>
                 );
             case 'selesai':
                 return (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200 dark:bg-emerald-950/40 dark:text-emerald-500 dark:border-emerald-800/40">
                         <CheckCircle className="size-3" />
                         Selesai
                     </span>
                 );
             case 'ditolak':
                 return (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200 dark:bg-red-950/40 dark:text-red-500 dark:border-red-800/40">
                         <XCircle className="size-3" />
                         Ditolak
                     </span>
@@ -179,18 +200,26 @@ export default function VerifikasiIndex({ pensiunans, filters }: Props) {
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
                 <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-emerald-700 flex items-center gap-2">
-                            <Clock className="size-6 text-emerald-700" />
+                        <h1 className="text-2xl font-bold text-neutral-900 dark:text-emerald-700 flex items-center gap-2">
+                            <Clock className="size-6 text-neutral-600 dark:text-emerald-700" />
                             Antrean Verifikasi Pensiunan
                         </h1>
                         <p className="text-sm text-neutral-500">
                             Pantau, verifikasi, dan lakukan mutasi status kepesertaan BPJS Kesehatan dari pengajuan BKPSDM.
                         </p>
                     </div>
-                    <Button onClick={() => setIsReportOpen(true)} variant="outline" className="w-full md:w-auto gap-2 border-emerald-800/40 text-emerald-700 hover:bg-emerald-950/30">
-                        <Printer className="size-4" />
-                        Cetak Laporan
-                    </Button>
+                    <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
+                        {processableCount >= 50 && (
+                            <Button onClick={() => setIsBulkOpen(true)} className="w-full md:w-auto gap-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold">
+                                <CheckCircle className="size-4" />
+                                Setujui Masal (50+)
+                            </Button>
+                        )}
+                        <Button onClick={() => setIsReportOpen(true)} variant="outline" className="w-full md:w-auto gap-2 border-neutral-200 dark:border-emerald-800/40 text-neutral-700 dark:text-emerald-700 hover:bg-neutral-50 dark:hover:bg-emerald-950/30">
+                            <Printer className="size-4" />
+                            Cetak Laporan
+                        </Button>
+                    </div>
                 </div>
 
                 <Card className="border border-neutral-200 dark:border-neutral-800">
@@ -226,7 +255,7 @@ export default function VerifikasiIndex({ pensiunans, filters }: Props) {
                     <CardContent className="p-0">
                         <div className="w-full overflow-x-auto">
                             <table className="w-full text-sm text-left text-neutral-500 dark:text-neutral-400">
-                                <thead className="text-xs text-neutral-700 uppercase bg-neutral-50 dark:bg-neutral-900 dark:text-neutral-300 border-b border-neutral-200 dark:border-neutral-800">
+                                <thead className="text-xs text-neutral-700 uppercase bg-neutral-50 dark:bg-emerald-950/40 dark:text-emerald-700 border-b border-neutral-200 dark:border-emerald-900/40">
                                     <tr>
                                         <th scope="col" className="px-6 py-4">Nama / NIP</th>
                                         <th scope="col" className="px-6 py-4">TMT Pensiun</th>
@@ -246,11 +275,11 @@ export default function VerifikasiIndex({ pensiunans, filters }: Props) {
                                         </tr>
                                     ) : (
                                         pensiunans.data.map((pensiunan) => (
-                                            <tr key={pensiunan.id} className="hover:bg-neutral-50/50 dark:hover:bg-neutral-900/30 transition-colors">
+                                            <tr key={pensiunan.id} className="hover:bg-neutral-50/50 dark:hover:bg-emerald-950/20 transition-colors">
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     {pensiunan.pegawai ? (
                                                         <>
-                                                            <div className="font-semibold text-emerald-700">
+                                                            <div className="font-semibold text-neutral-900 dark:text-emerald-700">
                                                                 {pensiunan.pegawai.nama}
                                                             </div>
                                                             <div className="text-xs text-neutral-500">
@@ -262,17 +291,17 @@ export default function VerifikasiIndex({ pensiunans, filters }: Props) {
                                                     )}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="font-medium text-emerald-700">
+                                                    <div className="font-medium text-neutral-900 dark:text-emerald-700">
                                                         {new Date(pensiunan.tanggal_pensiun).toLocaleDateString('id-ID')}
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    <div className="text-emerald-700 font-medium">
+                                                    <div className="text-neutral-950 dark:text-emerald-700 font-medium">
                                                         {pensiunan.satuan_kerja}
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="font-semibold text-emerald-700">
+                                                    <div className="font-semibold text-neutral-900 dark:text-emerald-700">
                                                         {formatRupiah(pensiunan.gaji_pokok)}
                                                     </div>
                                                 </td>
@@ -360,22 +389,22 @@ export default function VerifikasiIndex({ pensiunans, filters }: Props) {
                     {selectedPensiunan && (
                         <div className="space-y-6">
                             {/* Grid Detail Pegawai */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-lg bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-sm">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-lg bg-neutral-50 dark:bg-emerald-950/20 border border-neutral-200 dark:border-emerald-900/40 text-sm">
                                 <div>
                                     <span className="text-neutral-500 font-medium block">Nama Pegawai:</span>
-                                    <span className="font-semibold text-emerald-700">
+                                    <span className="font-semibold text-neutral-900 dark:text-emerald-700">
                                         {selectedPensiunan.pegawai?.nama || '-'}
                                     </span>
                                 </div>
                                 <div>
                                     <span className="text-neutral-500 font-medium block">NIP:</span>
-                                    <span className="font-semibold text-emerald-700">
+                                    <span className="font-semibold text-neutral-900 dark:text-emerald-700">
                                         {selectedPensiunan.pegawai?.nip || '-'}
                                     </span>
                                 </div>
                                 <div>
                                     <span className="text-neutral-500 font-medium block">Tanggal Lahir:</span>
-                                    <span className="font-semibold text-emerald-700">
+                                    <span className="font-semibold text-neutral-900 dark:text-emerald-700">
                                         {selectedPensiunan.pegawai?.tanggal_lahir 
                                             ? new Date(selectedPensiunan.pegawai.tanggal_lahir).toLocaleDateString('id-ID')
                                             : '-'
@@ -384,7 +413,7 @@ export default function VerifikasiIndex({ pensiunans, filters }: Props) {
                                 </div>
                                 <div>
                                     <span className="text-neutral-500 font-medium block">Pangkat / Golongan:</span>
-                                    <span className="font-semibold text-emerald-700">
+                                    <span className="font-semibold text-neutral-900 dark:text-emerald-700">
                                         {selectedPensiunan.pegawai?.golongan 
                                             ? `${selectedPensiunan.pegawai.golongan.nama_golongan} / ${selectedPensiunan.pegawai.golongan.pangkat}`
                                             : '-'
@@ -394,19 +423,19 @@ export default function VerifikasiIndex({ pensiunans, filters }: Props) {
                                 <div className="border-t border-neutral-200 dark:border-neutral-800 pt-2 col-span-2"></div>
                                 <div>
                                     <span className="text-neutral-500 font-medium block">TMT Pensiun:</span>
-                                    <span className="font-semibold text-emerald-700">
+                                    <span className="font-semibold text-neutral-900 dark:text-emerald-700">
                                         {new Date(selectedPensiunan.tanggal_pensiun).toLocaleDateString('id-ID')}
                                     </span>
                                 </div>
                                 <div>
                                     <span className="text-neutral-500 font-medium block">Satuan Kerja Pensiun:</span>
-                                    <span className="font-semibold text-emerald-700">
+                                    <span className="font-semibold text-neutral-900 dark:text-emerald-700">
                                         {selectedPensiunan.satuan_kerja}
                                     </span>
                                 </div>
                                 <div>
                                     <span className="text-neutral-500 font-medium block">Gaji Pokok Pensiun:</span>
-                                    <span className="font-semibold text-emerald-700 text-green-600 dark:text-green-400">
+                                    <span className="font-semibold text-neutral-900 dark:text-emerald-700 text-green-600 dark:text-green-400">
                                         {formatRupiah(selectedPensiunan.gaji_pokok)}
                                     </span>
                                 </div>
@@ -431,15 +460,15 @@ export default function VerifikasiIndex({ pensiunans, filters }: Props) {
                             {/* Alur Riwayat Status (Log Audit) */}
                             {selectedPensiunan.riwayats && selectedPensiunan.riwayats.length > 0 && (
                                 <div className="space-y-2">
-                                    <h4 className="text-sm font-semibold text-emerald-700">Riwayat Perjalanan Dokumen:</h4>
+                                    <h4 className="text-sm font-semibold text-neutral-900 dark:text-emerald-700">Riwayat Perjalanan Dokumen:</h4>
                                     <div className="relative border-l border-neutral-200 dark:border-neutral-800 ml-3 pl-5 space-y-4">
                                         {selectedPensiunan.riwayats.map((riwayat) => (
                                             <div key={riwayat.id} className="relative">
-                                                <span className="absolute -left-[27px] top-0.5 flex size-4 items-center justify-center rounded-full bg-white dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700">
-                                                    <span className="size-2 rounded-full bg-neutral-400" />
+                                                <span className="absolute -left-[27px] top-0.5 flex size-4 items-center justify-center rounded-full bg-neutral-200 dark:bg-emerald-950 border border-neutral-300 dark:border-emerald-800">
+                                                    <span className="size-2 rounded-full bg-neutral-500 dark:bg-emerald-700" />
                                                 </span>
                                                 <div className="text-xs">
-                                                    <span className="font-bold text-emerald-700">
+                                                    <span className="font-bold text-neutral-900 dark:text-emerald-450">
                                                         Status diubah ke {riwayat.status_baru.toUpperCase()}
                                                     </span>{' '}
                                                     oleh{' '}
@@ -501,7 +530,7 @@ export default function VerifikasiIndex({ pensiunans, filters }: Props) {
                                     <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
                                         Tutup
                                     </Button>
-                                    <Button type="submit" disabled={processing} className="bg-emerald-800 hover:bg-emerald-900 text-emerald-950 font-bold">
+                                    <Button type="submit" disabled={processing} className="font-bold">
                                         Simpan Verifikasi
                                     </Button>
                                 </DialogFooter>
@@ -558,9 +587,65 @@ export default function VerifikasiIndex({ pensiunans, filters }: Props) {
                             <Button type="button" variant="outline" onClick={() => setIsReportOpen(false)}>
                                 Batal
                             </Button>
-                            <Button type="submit" className="bg-emerald-800 hover:bg-emerald-900 text-emerald-950 font-bold gap-2">
+                            <Button type="submit" className="font-bold gap-2">
                                 <Printer className="size-4" />
                                 Buka Pratinjau Cetak
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
+
+            {/* Modal Dialog Persetujuan Masal */}
+            <Dialog open={isBulkOpen} onOpenChange={setIsBulkOpen}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-emerald-700 dark:text-emerald-600 font-bold">
+                            <CheckCircle className="size-5" />
+                            Otorisasi Persetujuan Masal (50 Data)
+                        </DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handleBulkSubmit} className="space-y-4">
+                        <p className="text-sm text-neutral-500 leading-relaxed">
+                            Anda akan menyetujui sekaligus <span className="font-bold text-neutral-900 dark:text-neutral-200">50 berkas pengajuan pensiunan</span> yang sedang dalam antrean (status Pending / Diproses).
+                            <br />
+                            <span className="font-semibold text-amber-600 dark:text-amber-500 mt-2 block">
+                                Tindakan ini memerlukan otorisasi berupa verifikasi email dan kata sandi Pimpinan.
+                            </span>
+                        </p>
+
+                        <div className="space-y-1">
+                            <Label htmlFor="bulk_email">Email Pimpinan <span className="text-red-500">*</span></Label>
+                            <Input
+                                id="bulk_email"
+                                type="email"
+                                placeholder="Contoh: pimpinan@gmail.com"
+                                value={bulkForm.data.email}
+                                onChange={(e) => bulkForm.setData('email', e.target.value)}
+                                required
+                            />
+                            {bulkForm.errors.email && <p className="text-xs text-red-500">{bulkForm.errors.email}</p>}
+                        </div>
+
+                        <div className="space-y-1">
+                            <Label htmlFor="bulk_password">Kata Sandi Pimpinan <span className="text-red-500">*</span></Label>
+                            <Input
+                                id="bulk_password"
+                                type="password"
+                                placeholder="Masukkan kata sandi pimpinan"
+                                value={bulkForm.data.password}
+                                onChange={(e) => bulkForm.setData('password', e.target.value)}
+                                required
+                            />
+                            {bulkForm.errors.password && <p className="text-xs text-red-500">{bulkForm.errors.password}</p>}
+                        </div>
+
+                        <DialogFooter className="mt-6">
+                            <Button type="button" variant="outline" onClick={() => setIsBulkOpen(false)}>
+                                Batal
+                            </Button>
+                            <Button type="submit" disabled={bulkForm.processing} className="font-bold bg-emerald-700 hover:bg-emerald-800 text-white">
+                                Verifikasi & Approve 50 Data
                             </Button>
                         </DialogFooter>
                     </form>

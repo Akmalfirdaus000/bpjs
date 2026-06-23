@@ -84,6 +84,32 @@ export function AppSidebar() {
                 icon: FileText,
             }
         );
+    } else if (role === 'pimpinan') {
+        mainNavItems.push(
+            {
+                title: 'Dashboard Pimpinan',
+                href: '/pimpinan/dashboard',
+                icon: LayoutGrid,
+            },
+            {
+                type: 'separator',
+            },
+            {
+                title: 'Laporan BKPSDM',
+                href: '/pimpinan/laporan-bkpsdm',
+                icon: FileText,
+            },
+            {
+                title: 'Laporan BPJS',
+                href: '/pimpinan/laporan-bpjs',
+                icon: ClipboardList,
+            },
+            {
+                title: 'Log Aktivitas',
+                href: '/pimpinan/log-aktivitas',
+                icon: History,
+            }
+        );
     } else {
         mainNavItems.push({
             title: 'Dashboard',
@@ -92,7 +118,13 @@ export function AppSidebar() {
         });
     }
 
-    const homeUrl = role === 'admin_bpjs' ? '/bpjs/dashboard' : (role === 'admin_bkpsdm' ? '/bkpsdm/dashboard' : dashboard());
+    const homeUrl = role === 'admin_bpjs' 
+        ? '/bpjs/dashboard' 
+        : (role === 'admin_bkpsdm' 
+            ? '/bkpsdm/dashboard' 
+            : (role === 'pimpinan' 
+                ? '/pimpinan/dashboard' 
+                : dashboard()));
 
     return (
         <Sidebar collapsible="icon" variant="inset">

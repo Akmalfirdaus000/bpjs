@@ -81,8 +81,8 @@ export default function PensiunanSelesai({ pensiunans, filters }: Props) {
             <Head title="Data Mutasi Pensiun Selesai" />
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
                 <div>
-                    <h1 className="text-2xl font-bold text-emerald-700 flex items-center gap-2">
-                        <CheckCircle2 className="size-6 text-emerald-700" />
+                    <h1 className="text-2xl font-bold text-neutral-900 dark:text-emerald-700 flex items-center gap-2">
+                        <CheckCircle2 className="size-6 text-neutral-600 dark:text-emerald-700" />
                         Mutasi Pensiun Selesai
                     </h1>
                     <p className="text-sm text-neutral-500">
@@ -107,7 +107,7 @@ export default function PensiunanSelesai({ pensiunans, filters }: Props) {
                     <CardContent className="p-0">
                         <div className="w-full overflow-x-auto">
                             <table className="w-full text-sm text-left text-neutral-500 dark:text-neutral-400">
-                                <thead className="text-xs text-neutral-700 uppercase bg-neutral-50 dark:bg-neutral-900 dark:text-neutral-300 border-b border-neutral-200 dark:border-neutral-800">
+                                <thead className="text-xs text-neutral-700 uppercase bg-neutral-50 dark:bg-emerald-950/40 border-b border-neutral-200 dark:border-emerald-900/40">
                                     <tr>
                                         <th className="px-6 py-4">No</th>
                                         <th className="px-6 py-4">Pegawai</th>
@@ -128,13 +128,13 @@ export default function PensiunanSelesai({ pensiunans, filters }: Props) {
                                         </tr>
                                     ) : (
                                         pensiunans.data.map((item, idx) => (
-                                            <tr key={item.id} className="hover:bg-neutral-50/50 dark:hover:bg-neutral-900/30 transition-colors">
+                                            <tr key={item.id} className="hover:bg-neutral-50/50 dark:hover:bg-emerald-950/20 transition-colors">
                                                 <td className="px-6 py-4 font-mono">
                                                     {(pensiunans.current_page - 1) * 10 + idx + 1}
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <div className="flex flex-col">
-                                                        <span className="font-semibold text-emerald-700">{item.pegawai.nama}</span>
+                                                        <span className="font-semibold text-neutral-900 dark:text-emerald-700">{item.pegawai.nama}</span>
                                                         <span className="text-xs font-mono text-neutral-500">NIP: {item.pegawai.nip}</span>
                                                     </div>
                                                 </td>

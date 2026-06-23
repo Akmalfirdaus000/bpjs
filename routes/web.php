@@ -11,6 +11,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             return redirect()->route('bpjs.dashboard');
         } elseif ($role === 'admin_bkpsdm') {
             return redirect()->route('bkpsdm.dashboard');
+        } elseif ($role === 'pimpinan') {
+            return redirect()->route('pimpinan.dashboard');
         }
         abort(403, 'Unauthorized role.');
     })->name('dashboard');
@@ -43,6 +45,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('bpjs/log-aktivitas', [App\Http\Controllers\Bpjs\VerifikasiController::class, 'logAktivitas'])->name('bpjs.log-aktivitas');
         Route::get('bpjs/verifikasi', [App\Http\Controllers\Bpjs\VerifikasiController::class, 'index'])->name('bpjs.verifikasi.index');
         Route::patch('bpjs/verifikasi/{pensiunan}/status', [App\Http\Controllers\Bpjs\VerifikasiController::class, 'updateStatus'])->name('bpjs.verifikasi.status');
+        Route::post('bpjs/verifikasi/bulk-approve', [App\Http\Controllers\Bpjs\VerifikasiController::class, 'bulkApprove'])->name('bpjs.verifikasi.bulk-approve');
     });
 
     Route::middleware(['role:admin_bkpsdm'])->group(function () {
@@ -101,6 +104,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('bkpsdm/pensiun', [App\Http\Controllers\Bkpsdm\PensiunanController::class, 'store'])->name('bkpsdm.pensiun.store');
         Route::post('bkpsdm/pensiun/{pensiunan}', [App\Http\Controllers\Bkpsdm\PensiunanController::class, 'update'])->name('bkpsdm.pensiun.update');
         Route::delete('bkpsdm/pensiun/{pensiunan}', [App\Http\Controllers\Bkpsdm\PensiunanController::class, 'destroy'])->name('bkpsdm.pensiun.destroy');
+    });
+
+    Route::middleware(['role:pimpinan'])->group(function () {
+        Route::get('pimpinan/dashboard', [App\Http\Controllers\PimpinanController::class, 'dashboard'])->name('pimpinan.dashboard');
+        Route::get('pimpinan/laporan-bkpsdm', [App\Http\Controllers\PimpinanController::class, 'laporanBkpsdm'])->name('pimpinan.laporan-bkpsdm');
+        Route::get('pimpinan/laporan-bkpsdm/cetak', [App\Http\Controllers\PimpinanController::class, 'cetakBkpsdm'])->name('pimpinan.laporan-bkpsdm.cetak');
+        Route::get('pimpinan/laporan-bpjs', [App\Http\Controllers\PimpinanController::class, 'laporanBpjs'])->name('pimpinan.laporan-bpjs');
+        Route::get('pimpinan/laporan-bpjs/cetak', [App\Http\Controllers\PimpinanController::class, 'cetakBpjs'])->name('pimpinan.laporan-bpjs.cetak');
+        Route::get('pimpinan/log-aktivitas', [App\Http\Controllers\PimpinanController::class, 'logAktivitas'])->name('pimpinan.log-aktivitas');
     });
 });
 

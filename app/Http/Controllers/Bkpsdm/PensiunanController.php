@@ -37,9 +37,12 @@ class PensiunanController extends Controller
             $query->whereIn('status', ['pending', 'diproses', 'selesai']);
         })->with('golongan')->get();
 
+        $golongans = \App\Models\Golongan::orderBy('nama_golongan', 'asc')->get();
+
         return Inertia::render('bkpsdm/pensiun/index', [
             'pensiunans' => $pensiunans,
             'pegawais' => $pegawais,
+            'golongans' => $golongans,
             'filters' => $request->only(['search', 'status'])
         ]);
     }
@@ -52,10 +55,14 @@ class PensiunanController extends Controller
             'satuan_kerja' => 'required|string',
             'gaji_pokok' => 'required|numeric|min:0',
             'dokumen_sk' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'golongan_id' => 'required|exists:golongans,id',
         ]);
 
         DB::beginTransaction();
         try {
+            $pegawai = Pegawai::findOrFail($validated['pegawai_id']);
+            $pegawai->update(['golongan_id' => $request->input('golongan_id')]);
+
             if ($request->hasFile('dokumen_sk')) {
                 $path = $request->file('dokumen_sk')->store('dokumen_sk_pensiun', 'public');
                 $validated['dokumen_sk'] = $path;
@@ -63,6 +70,8 @@ class PensiunanController extends Controller
 
             $validated['user_id'] = auth()->id();
             $validated['status'] = 'pending';
+
+            unset($validated['golongan_id']);
 
             $pensiunan = Pensiunan::create($validated);
 
@@ -111,10 +120,15 @@ class PensiunanController extends Controller
             'satuan_kerja' => 'required|string',
             'gaji_pokok' => 'required|numeric|min:0',
             'dokumen_sk' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'golongan_id' => 'required|exists:golongans,id',
         ]);
 
         DB::beginTransaction();
         try {
+            if ($pensiunan->pegawai) {
+                $pensiunan->pegawai->update(['golongan_id' => $request->input('golongan_id')]);
+            }
+
             if ($request->hasFile('dokumen_sk')) {
                 // Delete old file
                 if ($pensiunan->dokumen_sk) {
@@ -127,6 +141,8 @@ class PensiunanController extends Controller
             // Reset status to pending when edited/resubmitted
             $validated['status'] = 'pending';
             $validated['catatan'] = null; // Clear old rejection note
+
+            unset($validated['golongan_id']);
 
             $pensiunan->update($validated);
 

@@ -28,11 +28,72 @@ class VerifikasiController extends Controller
         }
 
         $pensiunans = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
+        $processableCount = Pensiunan::whereIn('status', ['pending', 'diproses'])->count();
 
         return Inertia::render('bpjs/verifikasi/index', [
             'pensiunans' => $pensiunans,
+            'processableCount' => $processableCount,
             'filters' => $request->only(['search', 'status'])
         ]);
+    }
+
+    public function bulkApprove(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+        if (!\Illuminate\Support\Facades\Auth::validate([
+            'email' => $validated['email'],
+            'password' => $validated['password'],
+        ])) {
+            return redirect()->back()->withErrors([
+                'email' => 'Kredensial Pimpinan tidak valid.',
+            ]);
+        }
+
+        $pimpinan = \App\Models\User::where('email', $validated['email'])->first();
+        if (!$pimpinan || $pimpinan->role !== 'pimpinan') {
+            return redirect()->back()->withErrors([
+                'email' => 'User yang dimasukkan bukan merupakan Pimpinan.',
+            ]);
+        }
+
+        $pensiunans = Pensiunan::whereIn('status', ['pending', 'diproses'])
+            ->orderBy('created_at', 'asc')
+            ->take(50)
+            ->get();
+
+        if ($pensiunans->isEmpty()) {
+            return redirect()->back()->with('error', 'Tidak ada pengajuan pensiun yang perlu disetujui.');
+        }
+
+        DB::beginTransaction();
+        try {
+            foreach ($pensiunans as $pensiunan) {
+                $statusSebelumnya = $pensiunan->status;
+                $pensiunan->update([
+                    'status' => 'selesai',
+                    'verified_by' => auth()->id(),
+                    'verified_at' => now(),
+                ]);
+
+                RiwayatStatusPensiun::create([
+                    'pensiunan_id' => $pensiunan->id,
+                    'status_sebelumnya' => $statusSebelumnya,
+                    'status_baru' => 'selesai',
+                    'catatan' => 'Persetujuan masal disahkan dengan verifikasi Pimpinan (' . $pimpinan->name . ')',
+                    'user_id' => auth()->id(),
+                ]);
+            }
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Berhasil menyetujui ' . $pensiunans->count() . ' pengajuan pensiun sekaligus.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 
     public function updateStatus(Request $request, Pensiunan $pensiunan)

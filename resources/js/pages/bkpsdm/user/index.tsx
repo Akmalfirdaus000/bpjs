@@ -13,7 +13,7 @@ interface UserData {
     id: number;
     name: string;
     email: string;
-    role: 'admin_bkpsdm' | 'admin_bpjs';
+    role: 'admin_bkpsdm' | 'admin_bpjs' | 'pimpinan';
 }
 
 interface Paginated<T> {
@@ -38,7 +38,7 @@ export default function UserIndex({ users, filters }: Props) {
         name: '',
         email: '',
         password: '',
-        role: 'admin_bkpsdm' as 'admin_bkpsdm' | 'admin_bpjs',
+        role: 'admin_bkpsdm' as 'admin_bkpsdm' | 'admin_bpjs' | 'pimpinan',
     });
 
     const handleSearch = (e: React.FormEvent) => {
@@ -116,7 +116,7 @@ export default function UserIndex({ users, filters }: Props) {
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
                 <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
+                        <h1 className="text-2xl font-bold text-neutral-900 dark:text-emerald-700">
                             Manajemen User Admin
                         </h1>
                         <p className="text-sm text-neutral-500">
@@ -146,7 +146,7 @@ export default function UserIndex({ users, filters }: Props) {
                     <CardContent className="p-0">
                         <div className="w-full overflow-x-auto">
                             <table className="w-full text-sm text-left text-neutral-500 dark:text-neutral-400">
-                                <thead className="text-xs text-neutral-700 uppercase bg-neutral-50 dark:bg-neutral-900 dark:text-neutral-300 border-b border-neutral-200 dark:border-neutral-800">
+                                <thead className="text-xs text-neutral-700 uppercase bg-neutral-50 dark:bg-emerald-950/40 dark:text-emerald-700 border-b border-neutral-200 dark:border-emerald-900/40">
                                     <tr>
                                         <th scope="col" className="px-6 py-4 w-[10%]">No</th>
                                         <th scope="col" className="px-6 py-4 w-[30%]">Nama Lengkap</th>
@@ -164,7 +164,7 @@ export default function UserIndex({ users, filters }: Props) {
                                         </tr>
                                     ) : (
                                         users.data.map((user, idx) => (
-                                            <tr key={user.id} className="hover:bg-neutral-50/50 dark:hover:bg-neutral-900/30 transition-colors">
+                                            <tr key={user.id} className="hover:bg-neutral-50/50 dark:hover:bg-emerald-950/20 transition-colors">
                                                 <td className="px-6 py-4 font-mono">
                                                     {(users.current_page - 1) * 10 + idx + 1}
                                                 </td>
@@ -173,17 +173,19 @@ export default function UserIndex({ users, filters }: Props) {
                                                         <div className="p-1 bg-neutral-100 dark:bg-neutral-800 rounded-full">
                                                             <User className="size-4 text-neutral-600 dark:text-neutral-400" />
                                                         </div>
-                                                        <span className="font-semibold text-neutral-900 dark:text-neutral-100">{user.name}</span>
+                                                        <span className="font-semibold text-neutral-900 dark:text-emerald-700">{user.name}</span>
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4">{user.email}</td>
                                                 <td className="px-6 py-4">
                                                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
                                                         user.role === 'admin_bkpsdm'
-                                                            ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-800'
-                                                            : 'bg-green-50 text-green-700 border-green-200 dark:bg-green-950/20 dark:text-green-400 dark:border-green-800'
+                                                            ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-500 dark:border-blue-800/40'
+                                                            : user.role === 'admin_bpjs'
+                                                            ? 'bg-green-50 text-green-700 border-green-200 dark:bg-emerald-950/40 dark:text-emerald-500 dark:border-emerald-800/40'
+                                                            : 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-500 dark:border-purple-800/40'
                                                     }`}>
-                                                        {user.role === 'admin_bkpsdm' ? 'Admin BKPSDM' : 'Admin BPJS'}
+                                                        {user.role === 'admin_bkpsdm' ? 'Admin BKPSDM' : user.role === 'admin_bpjs' ? 'Admin BPJS' : 'Pimpinan'}
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4 text-right whitespace-nowrap">
@@ -315,7 +317,7 @@ export default function UserIndex({ users, filters }: Props) {
                             <Label htmlFor="role">Role Akses <span className="text-red-500">*</span></Label>
                             <Select
                                 value={data.role}
-                                onValueChange={(val) => setData('role', val as 'admin_bkpsdm' | 'admin_bpjs')}
+                                onValueChange={(val) => setData('role', val as 'admin_bkpsdm' | 'admin_bpjs' | 'pimpinan')}
                             >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Pilih Role" />
@@ -323,6 +325,7 @@ export default function UserIndex({ users, filters }: Props) {
                                 <SelectContent>
                                     <SelectItem value="admin_bkpsdm">Admin BKPSDM</SelectItem>
                                     <SelectItem value="admin_bpjs">Admin BPJS Kesehatan</SelectItem>
+                                    <SelectItem value="pimpinan">Pimpinan (Monitoring & Laporan)</SelectItem>
                                 </SelectContent>
                             </Select>
                             {errors.role && <p className="text-xs text-red-500">{errors.role}</p>}

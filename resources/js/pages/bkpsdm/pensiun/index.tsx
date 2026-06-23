@@ -22,6 +22,7 @@ interface Pegawai {
     nama: string;
     tanggal_lahir: string;
     golongan?: Golongan;
+    golongan_id?: number;
 }
 
 interface Pensiunan {
@@ -49,10 +50,11 @@ interface Paginated<T> {
 interface Props {
     pensiunans: Paginated<Pensiunan>;
     pegawais: Pegawai[];
+    golongans: Golongan[];
     filters: { search?: string; status?: string };
 }
 
-export default function PensiunIndex({ pensiunans, pegawais, filters }: Props) {
+export default function PensiunIndex({ pensiunans, pegawais, golongans = [], filters }: Props) {
     const [search, setSearch] = useState(filters.search || '');
     const [statusFilter, setStatusFilter] = useState(filters.status || 'all');
     const [isOpen, setIsOpen] = useState(false);
@@ -73,6 +75,7 @@ export default function PensiunIndex({ pensiunans, pegawais, filters }: Props) {
         satuan_kerja: '',
         gaji_pokok: '',
         dokumen_sk: null as File | null,
+        golongan_id: '',
     });
 
     const filteredPegawais = pegawais.filter((p) =>
@@ -100,9 +103,28 @@ export default function PensiunIndex({ pensiunans, pegawais, filters }: Props) {
 
     // Watch pegawai selection change
     const handlePegawaiChange = (id: string) => {
-        setData('pegawai_id', id);
         const peg = pegawais.find((p) => String(p.id) === id) || null;
         setSelectedPegawai(peg);
+
+        // Auto rise by 1 rank if possible, otherwise default to current rank
+        let nextGolonganId = '';
+        if (peg && peg.golongan_id) {
+            const currentIdx = golongans.findIndex((g) => g.id === peg.golongan_id);
+            if (currentIdx !== -1 && currentIdx + 1 < golongans.length) {
+                // If they are sorted by rank, index+1 could be next rank.
+                // Let's just default to current rank first, but since the user requested "pangkat naik 1 tingkat", 
+                // let's try to set to next index, or fall back to current.
+                nextGolonganId = String(golongans[currentIdx + 1].id);
+            } else {
+                nextGolonganId = String(peg.golongan_id);
+            }
+        }
+
+        setData((prev) => ({
+            ...prev,
+            pegawai_id: id,
+            golongan_id: nextGolonganId,
+        }));
     };
 
     const openModal = () => {
@@ -128,6 +150,7 @@ export default function PensiunIndex({ pensiunans, pegawais, filters }: Props) {
             satuan_kerja: pensiunan.satuan_kerja,
             gaji_pokok: String(pensiunan.gaji_pokok),
             dokumen_sk: null,
+            golongan_id: pensiunan.pegawai && pensiunan.pegawai.golongan_id ? String(pensiunan.pegawai.golongan_id) : '',
         });
         setIsOpen(true);
     };
@@ -194,28 +217,28 @@ export default function PensiunIndex({ pensiunans, pegawais, filters }: Props) {
         switch (status) {
             case 'pending':
                 return (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200 dark:bg-amber-950/40 dark:text-amber-500 dark:border-amber-800/40">
                         <Clock className="size-3" />
                         Pending
                     </span>
                 );
             case 'diproses':
                 return (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200 dark:bg-blue-950/40 dark:text-blue-500 dark:border-blue-800/40">
                         <Play className="size-3" />
                         Diproses
                     </span>
                 );
             case 'selesai':
                 return (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200 dark:bg-emerald-950/40 dark:text-emerald-500 dark:border-emerald-800/40">
                         <CheckCircle className="size-3" />
                         Selesai
                     </span>
                 );
             case 'ditolak':
                 return (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200 dark:bg-red-950/40 dark:text-red-500 dark:border-red-800/40">
                         <XCircle className="size-3" />
                         Ditolak
                     </span>
@@ -229,7 +252,7 @@ export default function PensiunIndex({ pensiunans, pegawais, filters }: Props) {
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
                 <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
+                        <h1 className="text-2xl font-bold text-neutral-900 dark:text-emerald-700">
                             Pengajuan Pensiun PNS
                         </h1>
                         <p className="text-sm text-neutral-500">
@@ -281,7 +304,7 @@ export default function PensiunIndex({ pensiunans, pegawais, filters }: Props) {
                     <CardContent className="p-0">
                         <div className="w-full overflow-x-auto">
                             <table className="w-full text-sm text-left text-neutral-500 dark:text-neutral-400">
-                                <thead className="text-xs text-neutral-700 uppercase bg-neutral-50 dark:bg-neutral-900 dark:text-neutral-300 border-b border-neutral-200 dark:border-neutral-800">
+                                <thead className="text-xs text-neutral-700 uppercase bg-neutral-50 dark:bg-emerald-950/40 dark:text-emerald-700 border-b border-neutral-200 dark:border-emerald-900/40">
                                     <tr>
                                         <th scope="col" className="px-6 py-4">Nama / NIP</th>
                                         <th scope="col" className="px-6 py-4">TMT Pensiun</th>
@@ -301,11 +324,11 @@ export default function PensiunIndex({ pensiunans, pegawais, filters }: Props) {
                                         </tr>
                                     ) : (
                                         pensiunans.data.map((pensiunan) => (
-                                            <tr key={pensiunan.id} className="hover:bg-neutral-50/50 dark:hover:bg-neutral-900/30 transition-colors">
+                                            <tr key={pensiunan.id} className="hover:bg-neutral-50/50 dark:hover:bg-emerald-950/20 transition-colors">
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     {pensiunan.pegawai ? (
                                                         <>
-                                                            <div className="font-semibold text-neutral-900 dark:text-neutral-100">
+                                                            <div className="font-semibold text-neutral-900 dark:text-emerald-700">
                                                                 {pensiunan.pegawai.nama}
                                                             </div>
                                                             <div className="text-xs text-neutral-500">
@@ -317,17 +340,17 @@ export default function PensiunIndex({ pensiunans, pegawais, filters }: Props) {
                                                     )}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="font-medium text-neutral-900 dark:text-neutral-100">
+                                                    <div className="font-medium text-neutral-900 dark:text-emerald-700">
                                                         {new Date(pensiunan.tanggal_pensiun).toLocaleDateString('id-ID')}
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    <div className="text-neutral-950 dark:text-neutral-200 font-medium">
+                                                    <div className="text-neutral-950 dark:text-emerald-700 font-medium">
                                                         {pensiunan.satuan_kerja}
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="font-semibold text-neutral-900 dark:text-neutral-100">
+                                                    <div className="font-semibold text-neutral-900 dark:text-emerald-700">
                                                         {formatRupiah(pensiunan.gaji_pokok)}
                                                     </div>
                                                 </td>
@@ -546,6 +569,25 @@ export default function PensiunIndex({ pensiunans, pegawais, filters }: Props) {
                                     onChange={(e) => setData('tanggal_pensiun', e.target.value)}
                                 />
                                 {errors.tanggal_pensiun && <p className="text-xs text-red-500">{errors.tanggal_pensiun}</p>}
+                            </div>
+                            <div className="space-y-1">
+                                <Label htmlFor="golongan_id">Golongan / Pangkat Pensiun <span className="text-red-500">*</span></Label>
+                                <Select
+                                    value={data.golongan_id}
+                                    onValueChange={(val) => setData('golongan_id', val)}
+                                >
+                                    <SelectTrigger id="golongan_id">
+                                        <SelectValue placeholder="Pilih Golongan/Pangkat Pensiun" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {golongans.map((g) => (
+                                            <SelectItem key={g.id} value={String(g.id)}>
+                                                {g.nama_golongan} - {g.pangkat}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {errors.golongan_id && <p className="text-xs text-red-500">{errors.golongan_id}</p>}
                             </div>
                             <div className="space-y-1">
                                 <Label htmlFor="satuan_kerja">Satuan Kerja Pensiun <span className="text-red-500">*</span></Label>

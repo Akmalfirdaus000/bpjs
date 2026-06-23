@@ -110,7 +110,7 @@ export default function GolonganIndex({ golongans, filters }: Props) {
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
                 <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
+                        <h1 className="text-2xl font-bold text-neutral-900 dark:text-emerald-700">
                             Master Golongan & Pangkat
                         </h1>
                         <p className="text-sm text-neutral-500">
@@ -140,7 +140,7 @@ export default function GolonganIndex({ golongans, filters }: Props) {
                     <CardContent className="p-0">
                         <div className="w-full overflow-x-auto">
                             <table className="w-full text-sm text-left text-neutral-500 dark:text-neutral-400">
-                                <thead className="text-xs text-neutral-700 uppercase bg-neutral-50 dark:bg-neutral-900 dark:text-neutral-300 border-b border-neutral-200 dark:border-neutral-800">
+                                <thead className="text-xs text-neutral-700 uppercase bg-neutral-50 dark:bg-emerald-950/40 dark:text-emerald-700 border-b border-neutral-200 dark:border-emerald-900/40">
                                     <tr>
                                         <th scope="col" className="px-6 py-4 w-[10%]">No</th>
                                         <th scope="col" className="px-6 py-4 w-[40%]">Nama Golongan</th>
@@ -157,11 +157,11 @@ export default function GolonganIndex({ golongans, filters }: Props) {
                                         </tr>
                                     ) : (
                                         golongans.data.map((golongan, idx) => (
-                                            <tr key={golongan.id} className="hover:bg-neutral-50/50 dark:hover:bg-neutral-900/30 transition-colors">
+                                            <tr key={golongan.id} className="hover:bg-neutral-50/50 dark:hover:bg-emerald-950/20 transition-colors">
                                                 <td className="px-6 py-4 font-mono">
                                                     {(golongans.current_page - 1) * 10 + idx + 1}
                                                 </td>
-                                                <td className="px-6 py-4 font-semibold text-neutral-900 dark:text-neutral-100">
+                                                <td className="px-6 py-4 font-semibold text-neutral-900 dark:text-emerald-700">
                                                     {golongan.nama_golongan}
                                                 </td>
                                                 <td className="px-6 py-4">

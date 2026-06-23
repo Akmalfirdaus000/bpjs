@@ -29,6 +29,13 @@ class DatabaseSeeder extends Seeder
             'role' => 'admin_bkpsdm',
         ]);
 
+        $pimpinan = User::create([
+            'name' => 'Pimpinan BPJS & BKPSDM',
+            'email' => 'pimpinan@gmail.com',
+            'password' => Hash::make('123'),
+            'role' => 'pimpinan',
+        ]);
+
         // 3. Create Golongans
         $gol1 = Golongan::create(['nama_golongan' => 'IV/a', 'pangkat' => 'Pembina']);
         $gol2 = Golongan::create(['nama_golongan' => 'IV/b', 'pangkat' => 'Pembina Tingkat I']);
@@ -115,5 +122,36 @@ class DatabaseSeeder extends Seeder
             'verified_by' => $adminBpjs->id,
             'verified_at' => Carbon::now(),
         ]);
+
+        // Create 55 mock pegawais and pending pensiunans
+        for ($i = 5; $i <= 60; $i++) {
+            $nip = '197003031995031' . str_pad($i, 3, '0', STR_PAD_LEFT);
+            $nik = '137100000000' . str_pad($i, 4, '0', STR_PAD_LEFT);
+            $no_kk = '137100000000' . str_pad($i + 10, 4, '0', STR_PAD_LEFT);
+            
+            $peg = Pegawai::create([
+                'nip' => $nip,
+                'nik' => $nik,
+                'no_kk' => $no_kk,
+                'nama' => 'PNS Mock ' . $i,
+                'tempat_lahir' => 'Padang',
+                'tanggal_lahir' => '1970-03-03',
+                'jenis_kelamin' => 'Laki-laki',
+                'status_kawin' => 'Menikah',
+                'no_hp' => '0812' . str_pad($i, 8, '1', STR_PAD_LEFT),
+                'alamat' => 'Jl. Bypass No. ' . $i . ', Padang',
+                'hub_keluarga' => 'PESERTA',
+                'golongan_id' => $gol3->id,
+            ]);
+
+            Pensiunan::create([
+                'pegawai_id' => $peg->id,
+                'tanggal_pensiun' => Carbon::now()->addMonths(2),
+                'satuan_kerja' => 'Satker Mock Dinas ' . ($i % 3 + 1),
+                'gaji_pokok' => 3800000.00 + ($i * 10000),
+                'status' => 'pending',
+                'user_id' => $adminBkpsdm->id,
+            ]);
+        }
     }
 }
