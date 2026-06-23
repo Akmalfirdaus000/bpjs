@@ -103,7 +103,7 @@ export default function Dashboard({ stats, recentPensions, topSatker = [], golon
                             BKPSDM Administrator Portal
                         </span>
                         <h1 className="mt-3 text-2xl md:text-3xl font-extrabold text-emerald-700 tracking-tight">
-                            Selamat Datang di Sistem Pelaporan Pensiunan PNS
+                            Selamat Datang di Sistem Pelaporan Pensiunan PNS BPJS Kesehatan
                         </h1>
                         <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-300 leading-relaxed">
                             Monitor pengusulan pensiunan PNS Kota Padang dengan visualisasi data langsung, integrasi mutasi BPJS Kesehatan, dan pengelolaan master data kepegawaian dalam satu dasbor terpadu.

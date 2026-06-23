@@ -123,7 +123,7 @@ export default function PimpinanDashboard({ stats, recentPensions, recentActivit
                             Executive Portal & Monitoring
                         </span>
                         <h1 className="mt-3 text-2xl md:text-3xl font-extrabold text-neutral-950 dark:text-emerald-700 tracking-tight">
-                            Selamat Datang, Pimpinan BPJS & BKPSDM
+                            Selamat Datang di Sistem Pelaporan Pensiunan PNS BPJS Kesehatan
                         </h1>
                         <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-350 leading-relaxed">
                             Akses monitoring data usulan pensiunan PNS Kota Padang. Dapatkan visualisasi statistik pengajuan, progres mutasi kepesertaan BPJS Kesehatan, serta cetak laporan terpadu secara langsung.

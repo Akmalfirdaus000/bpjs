@@ -93,7 +93,7 @@ export default function Dashboard({ stats, recentActivities, topSatker = [] }: P
                             BPJS Kesehatan Verifikasi Portal
                         </span>
                         <h1 className="mt-3 text-2xl md:text-3xl font-extrabold text-neutral-950 dark:text-emerald-700 tracking-tight">
-                            Selamat Datang, Tim Verifikator BPJS Kesehatan
+                            Selamat Datang di Sistem Pelaporan Pensiunan PNS BPJS Kesehatan
                         </h1>
                         <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-300 leading-relaxed">
                             Kelola validasi berkas usulan TMT pensiun PNS Kota Padang. Mutasikan kepesertaan PNS aktif menjadi jaminan pensiunan untuk kelancaran pelayanan fasilitas kesehatan.
