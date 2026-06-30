@@ -48,6 +48,11 @@ export function AppSidebar() {
                 title: 'Log Verifikasi',
                 href: '/bpjs/log-aktivitas',
                 icon: History,
+            },
+            {
+                title: 'Manajemen User',
+                href: '/bpjs/user',
+                icon: UserCog,
             }
         );
     } else if (role === 'admin_bkpsdm') {
@@ -69,11 +74,6 @@ export function AppSidebar() {
                 title: 'Data Golongan',
                 href: '/bkpsdm/golongan',
                 icon: BookOpen,
-            },
-            {
-                title: 'Manajemen User',
-                href: '/bkpsdm/user',
-                icon: UserCog,
             },
             {
                 type: 'separator',

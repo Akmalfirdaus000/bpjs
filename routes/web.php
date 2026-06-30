@@ -48,6 +48,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('bpjs/verifikasi', [App\Http\Controllers\Bpjs\VerifikasiController::class, 'index'])->name('bpjs.verifikasi.index');
         Route::patch('bpjs/verifikasi/{pensiunan}/status', [App\Http\Controllers\Bpjs\VerifikasiController::class, 'updateStatus'])->name('bpjs.verifikasi.status');
         Route::post('bpjs/verifikasi/bulk-approve', [App\Http\Controllers\Bpjs\VerifikasiController::class, 'bulkApprove'])->name('bpjs.verifikasi.bulk-approve');
+
+        // Master User
+        Route::get('bpjs/user', [App\Http\Controllers\Bpjs\UserController::class, 'index'])->name('bpjs.user.index');
+        Route::post('bpjs/user', [App\Http\Controllers\Bpjs\UserController::class, 'store'])->name('bpjs.user.store');
+        Route::put('bpjs/user/{user}', [App\Http\Controllers\Bpjs\UserController::class, 'update'])->name('bpjs.user.update');
+        Route::delete('bpjs/user/{user}', [App\Http\Controllers\Bpjs\UserController::class, 'destroy'])->name('bpjs.user.destroy');
     });
 
     Route::middleware(['role:admin_bkpsdm'])->group(function () {
@@ -94,11 +100,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('bkpsdm/golongan/{golongan}', [App\Http\Controllers\Bkpsdm\GolonganController::class, 'update'])->name('bkpsdm.golongan.update');
         Route::delete('bkpsdm/golongan/{golongan}', [App\Http\Controllers\Bkpsdm\GolonganController::class, 'destroy'])->name('bkpsdm.golongan.destroy');
 
-        // Master User
-        Route::get('bkpsdm/user', [App\Http\Controllers\Bkpsdm\UserController::class, 'index'])->name('bkpsdm.user.index');
-        Route::post('bkpsdm/user', [App\Http\Controllers\Bkpsdm\UserController::class, 'store'])->name('bkpsdm.user.store');
-        Route::put('bkpsdm/user/{user}', [App\Http\Controllers\Bkpsdm\UserController::class, 'update'])->name('bkpsdm.user.update');
-        Route::delete('bkpsdm/user/{user}', [App\Http\Controllers\Bkpsdm\UserController::class, 'destroy'])->name('bkpsdm.user.destroy');
 
         // Pengajuan Pensiun
         Route::get('bkpsdm/pensiun/laporan', [App\Http\Controllers\Bkpsdm\PensiunanController::class, 'laporan'])->name('bkpsdm.pensiun.laporan');
